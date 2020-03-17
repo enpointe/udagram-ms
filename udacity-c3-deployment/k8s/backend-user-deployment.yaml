@@ -1,15 +1,16 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    service: backend-user
   name: backend-user
 spec:
+  selector:
+    matchLabels:
+      app: backend-user
   replicas: 2
   template:
     metadata:
       labels:
-        service: backend-user
+        app: backend-user
     spec:
       containers:
       - image: ktripp/udacity-restapi-user
@@ -21,13 +22,13 @@ spec:
             cpu: "250m"
           limits:
             memory: "1024Mi"
-            cpu: "500m"      
+            cpu: "500m"          
         env:
         - name: URL
           valueFrom:
             configMapKeyRef:
               name: env-config
-              key: URL 
+              key: URL
         - name: JWT_SECRET
           valueFrom:
             configMapKeyRef:
@@ -52,7 +53,13 @@ spec:
           valueFrom:
             secretKeyRef:
               name: env-secret
-              key: POSTGRESS_USERNAME
+              key: POSTGRESS_USERNAME   
       restartPolicy: Always
-
-
+      volumes:
+        - name: env-secret
+          secret:
+            secretName: env-secret
+        - name: configmap-volume
+          configMap:
+            name: env-config
+            
